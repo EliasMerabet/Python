@@ -1,0 +1,70 @@
+import mysql.connector
+from mysql.connector import errorcode
+
+class testBeresoft:
+    try:
+        con = mysql.connector.connect(user='root', password='sa12345', host='127.0.0.1',
+                                      database='test')
+        cur = con.cursor()
+        cur.execute("SELECT * FROM test")
+
+        col_names = [i[0] for i in cur.description]
+        lonCol = len(col_names)
+        rows = cur.fetchall()
+        lonRow = len(rows)
+
+        sumaTotal = [0 for col in xrange(lonCol)]
+        numNull = [0 for col in xrange(lonCol)]
+        valorMasRepe = [0 for col in xrange(lonCol)]
+        valorMedio = [0 for col in xrange(lonCol)]
+        columnasInv = [[0 for j in xrange(lonRow)] for i in xrange(lonCol)]
+        porcentaje = [0 for col in xrange(lonCol)]
+
+        cont = 0
+        for row in rows:
+            for i in xrange(lonCol):
+                if row[i] is None:
+                    numNull[i] += 1
+                    #Si el valor es null, meto en la tabla invertida -1. Si no me lo deja a 0 por la inicializacion.
+                    columnasInv[i][cont] = -1
+                else:
+                    sumaTotal[i] = sumaTotal[i] + row[i]
+                    #He invertido la tabla para poder usar el count, que lo hace por filas.
+                    columnasInv[i][cont] = row[i]
+            cont += 1
+
+        cont1 = 0
+        valorMasRepe1 = [[0 for i in range(2)]for col in xrange(lonRow)]
+        for row in columnasInv:
+            max = 0
+            veces = 0
+            for i in xrange(lonRow):
+                if row.count(row[i]) > veces:
+                    max = row[i]
+                    veces = row.count(row[i])
+            valorMasRepe[cont1] = max
+            cont1 += 1
+
+        sql = "CREATE TABLE IF NOT EXISTS testResultado(campo varchar(16) DEFAULT NULL, valorMedio float(11) DEFAULT NULL, masRepetido float(11) DEFAULT NULL, porcentaje float(11) DEFAULT NULL) ENGINE=MyISAM DEFAULT CHARSET=latin1"
+        cur.execute(sql)
+
+        for i in xrange(lonCol):
+            valorMedio[i] = sumaTotal[i] / float(lonRow)
+            porcentaje[i] = (1 - (numNull[i] / float(lonRow))) * 100
+            sql1 = "INSERT INTO testResultado VALUES (%s,%s,%s,%s)"
+            try:
+                cur.execute(sql1, (col_names[i], valorMedio[i], valorMasRepe[i], porcentaje[i]))
+                con.commit()
+            except:
+                con.rollback()
+
+    except mysql.connector.Error as err:
+        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            print("Error de Acceso a la BBDD")
+        elif err.errno == errorcode.ER_BAD_DB_ERROR:
+            print("BBDD no existe")
+        else:
+            print(err)
+
+    finally:
+        con.close()
