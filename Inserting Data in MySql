@@ -17,7 +17,7 @@ class testBeresoft:
         numNull = [0 for col in xrange(lonCol)]
         valorMasRepe = [0 for col in xrange(lonCol)]
         valorMedio = [0 for col in xrange(lonCol)]
-        columnasInv = [[0 for j in xrange(lonRow)] for i in xrange(lonCol)]
+        columnasInv = [[-1 for j in xrange(lonRow)] for i in xrange(lonCol)]
         porcentaje = [0 for col in xrange(lonCol)]
 
         cont = 0
@@ -25,8 +25,6 @@ class testBeresoft:
             for i in xrange(lonCol):
                 if row[i] is None:
                     numNull[i] += 1
-                    #Si el valor es null, meto en la tabla invertida -1. Si no me lo deja a 0 por la inicializacion.
-                    columnasInv[i][cont] = -1
                 else:
                     sumaTotal[i] = sumaTotal[i] + row[i]
                     #He invertido la tabla para poder usar el count, que lo hace por filas.
