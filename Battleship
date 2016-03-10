@@ -115,8 +115,8 @@ class Battleship:
 obj = Battleship()
 print "Let's play Battleship!"
 print
-Battleship.army(obj, board)
-Battleship.print_board(obj, board)
+obj.army(board)
+obj.print_board(board)
 print
 print
-Battleship.jugar(obj, board)
+obj.jugar(board)
