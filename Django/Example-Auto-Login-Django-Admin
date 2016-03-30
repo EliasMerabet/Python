@@ -1,0 +1,29 @@
+SETTINGS.PY
+
+MIDDLEWARE_CLASSES = (
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+	'db.auto_auth.AutoLogin',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    #'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    #'django.middleware.security.SecurityMiddleware',
+)
+
+
+
+
+
+AUTO_AUT.PY
+
+from django.contrib.auth.models import User
+from django.contrib.auth.models import auth
+
+class AutoLogin(object):
+    def process_request(self, request):
+        user = auth.authenticate(username='xxx', password='xxxxxxxxxxxx')
+        if user:
+            request.user = user
+            auth.login(request, user)
