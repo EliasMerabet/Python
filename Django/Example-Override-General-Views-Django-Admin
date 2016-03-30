@@ -1,0 +1,14 @@
+ADMIN.PY
+
+class dbAdmin(admin.ModelAdmin):
+    list_display = ['',]
+    list_editable = list_display
+    ordering = ('',)
+    search_fields = ['', ]
+    list_per_page = records_Per_Page
+
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        mygetModels = getModels()
+        extra_context['modelsTables'] = mygetModels.getTablesModels()
+        return superdbAdminself).changelist_view(request, extra_context=extra_context)
