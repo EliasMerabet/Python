@@ -1,4 +1,4 @@
 def index(request):
-  subprocess.Popen("python2.7 /path/manage.py inspectdb > /path/app/models1.py", shell=True)
-  subprocess.Popen("mv /path/models1.py /path/models.py", shell=True)
+  subprocess.Popen("python2.7 /path/manage.py inspectdb > /path/app/admin1.py", shell=True)
+  subprocess.Popen("mv /path/admin1.py /path/admin.py", shell=True)
 	return render_to_response('index/index.html',{'modelsTables':modelsTables}, context_instance = RequestContext(request))
