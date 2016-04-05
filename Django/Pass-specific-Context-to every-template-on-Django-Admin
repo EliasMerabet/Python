@@ -1,0 +1,7 @@
+# OVERRIDE IN AdminSite
+
+def each_context(self, request):
+        context = super(MyAdminSite, self).each_context(request)               
+        mygetModels = getModels()
+        context['modelsTables'] = mygetModels.getTablesModels()
+        return context
