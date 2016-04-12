@@ -1,0 +1,71 @@
+VIEW.
+
+class Paginator:
+    def __init__(self, hasPrevious, hasNext, numPages, page, actualNumberInit, actualNumberFinish, totalNumber):
+        self.hasPrevious = hasPrevious
+        self.hasNext = hasNext
+        self.numPages = numPages
+        self.page = page
+        self.previous = page - 1
+        self.next = page + 1
+        self.actualNumberInit = actualNumberInit
+        self.actualNumberFinish = actualNumberFinish
+        self.totalNumber = totalNumber
+        
+numPerPage = 25
+
+def srcexecjobdepen(request):
+# DO STUFF
+#
+#
+    hasNext = True
+    hasPrevious = True
+    page = int(request.GET.get('pageNumber', 1))
+    numPages = len(results) / (numPerPage * 1.0)
+    totalNumber = len(results)
+    
+    if numPages > (len(results) / numPerPage):
+        numPages = int(round((len(results) / numPerPage))) + 1
+    else:
+        numPages = int(round((len(results) / numPerPage)))
+    
+    print page
+    print numPages 
+    if page >= numPages:
+        page = numPages
+        hasNext = False
+        hasPrevious = True
+        actualNumberInit = ((page-1)*numPerPage) + 1
+        actualNumberFinish = totalNumber
+    elif page <= 1:
+        page = 1
+        hasPrevious = False
+        hasNext = True
+        actualNumberInit = 1
+        actualNumberFinish = page*numPerPage
+    else:
+        hasNext = True
+        hasPrevious = True
+        actualNumberInit = ((page-1)*numPerPage) + 1
+        actualNumberFinish = page*numPerPage
+        
+    results = results[actualNumberInit:actualNumberFinish]
+
+    paginator = Paginator(hasPrevious, hasNext, numPages, page, actualNumberInit, actualNumberFinish, totalNumber)            
+         
+    return render_to_response('admin/outOfModel.html',{'modelsTables':modelsTables, 'results':results, 'result_headers':result_headers, \
+                                                       'errores':errores, 'table_name':table_name, 'paginator': paginator}, RequestContext(request))
+                                                       
+TEMPLATE.
+
+<div>
+	{% if paginator.hasPrevious %}
+			<a href="/admin/db/?pageNumber={{ paginator.previous }}"> <input type="button" class="insertar" value="<<"/> </a>
+	{% endif %}
+	{% if paginator.hasNext %}
+			<a href="/admin/db/?pageNumber={{ paginator.next }}"> <input type="button" class="insertar" value=">>"/> </a>
+	{% endif %}
+		<span class="current">
+				&nbsp;&nbsp;&nbsp;Page {{ paginator.page }} of {{ paginator.numPages }}. Show record: {{ paginator.actualNumberInit}} to record: {{ paginator.actualNumberFinish}} of {{ paginator.totalNumber}} All.
+		</span>
+</div>
