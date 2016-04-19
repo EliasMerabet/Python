@@ -5,6 +5,15 @@ class Paginator:
         self.hasPrevious = hasPrevious
         self.hasNext = hasNext
         self.numPages = numPages
+        if numPages > 15:
+            if (page - 6) <= 1:
+                self.numPagesRange = xrange(2, 15)
+            elif (page + 14) > numPages:
+                self.numPagesRange = xrange(numPages - 13, numPages)
+            elif (page - 6) > 1:
+                self.numPagesRange = xrange(page-6, page + 7)
+        else:
+            self.numPagesRange = xrange(2, numPages)
         self.page = page
         self.previous = page - 1
         self.next = page + 1
@@ -14,58 +23,109 @@ class Paginator:
         
 numPerPage = 25
 
-def srcexecjobdepen(request):
-# DO STUFF
-#
-#
-    hasNext = True
-    hasPrevious = True
-    page = int(request.GET.get('pageNumber', 1))
-    numPages = len(results) / (numPerPage * 1.0)
-    totalNumber = len(results)
-    
-    if numPages > (len(results) / numPerPage):
-        numPages = int(round((len(results) / numPerPage))) + 1
-    else:
-        numPages = int(round((len(results) / numPerPage)))
-    
-    print page
-    print numPages 
-    if page >= numPages:
-        page = numPages
-        hasNext = False
-        hasPrevious = True
-        actualNumberInit = ((page-1)*numPerPage) + 1
-        actualNumberFinish = totalNumber
-    elif page <= 1:
-        page = 1
-        hasPrevious = False
-        hasNext = True
-        actualNumberInit = 1
-        actualNumberFinish = page*numPerPage
-    else:
+def getPaginator(self, page, results):
         hasNext = True
         hasPrevious = True
-        actualNumberInit = ((page-1)*numPerPage) + 1
-        actualNumberFinish = page*numPerPage
+        numPages = len(results) / (numPerPage * 1.0)
+        totalNumber = len(results)
         
-    results = results[actualNumberInit:actualNumberFinish]
-
-    paginator = Paginator(hasPrevious, hasNext, numPages, page, actualNumberInit, actualNumberFinish, totalNumber)            
-         
-    return render_to_response('admin/outOfModel.html',{'modelsTables':modelsTables, 'results':results, 'result_headers':result_headers, \
-                                                       'errores':errores, 'table_name':table_name, 'paginator': paginator}, RequestContext(request))
+        if numPages > (len(results) / numPerPage):
+            numPages = int(round((len(results) / numPerPage))) + 1
+        else:
+            numPages = int(round((len(results) / numPerPage)))
+        
+        if numPages == 1:
+            page = 1
+            hasNext = False
+            hasPrevious = False
+            actualNumberInit = 0
+            actualNumberFinish = totalNumber
+        elif page >= numPages:
+            page = numPages
+            hasNext = False
+            hasPrevious = True
+            actualNumberInit = ((page-1)*numPerPage)
+            actualNumberFinish = totalNumber
+        elif page <= 1:
+            page = 1
+            hasPrevious = False
+            hasNext = True
+            actualNumberInit = 0
+            actualNumberFinish = numPerPage
+        else:
+            hasNext = True
+            hasPrevious = True
+            actualNumberInit = ((page-1)*numPerPage)
+            actualNumberFinish = page*numPerPage
+          
+        results = results[actualNumberInit:actualNumberFinish]
+    
+        paginator = Paginator(hasPrevious, hasNext, numPages, page, actualNumberInit, actualNumberFinish, totalNumber)
+        
+        return results, paginator
                                                        
 TEMPLATE.
 
-<div>
-	{% if paginator.hasPrevious %}
-			<a href="/admin/db/?pageNumber={{ paginator.previous }}"> <input type="button" class="insertar" value="<<"/> </a>
-	{% endif %}
-	{% if paginator.hasNext %}
-			<a href="/admin/db/?pageNumber={{ paginator.next }}"> <input type="button" class="insertar" value=">>"/> </a>
-	{% endif %}
-		<span class="current">
-				&nbsp;&nbsp;&nbsp;Page {{ paginator.page }} of {{ paginator.numPages }}. Show record: {{ paginator.actualNumberInit}} to record: {{ paginator.actualNumberFinish}} of {{ paginator.totalNumber}} All.
-		</span>
-</div>
+<div style="position:relative; border: 1px solid #DDD; padding: 10px 10px 10px 10px; border-radius: 4px; display: inline-block;">
+    					
+    					<span class="current">
+            				Página {{ paginator.page }} de {{ paginator.numPages }}&nbsp;&nbsp;
+        				</span>
+        				
+    					{% if paginator.hasPrevious %}
+        					<a href="/path/{{ table_name }}/?pageNumber={{ paginator.previous }}" class="linkPager"><input type="button" class="buttonPager buttonPagerNormal" value="Anterior"/></a>
+    					{% endif %}
+    					
+    					<a href="/admin/db/{{ table_name }}/?pageNumber=1" class="linkPager"><input type="button" class="buttonPager buttonPagerFU" value="1"/></a>
+    					
+    					{% for i in paginator.numPagesRange %}
+    						{% if i == paginator.page %}
+    							<a href="/path/{{ table_name }}/?pageNumber={{ i }}" class="linkPager"> <input type="button" class="buttonPager buttonPagerCentral" value="{{ i }}"/></a>
+    						{% else %}
+    							<a href="/path/{{ table_name }}/?pageNumber={{ i }}" class="linkPager"> <input type="button" class="buttonPager buttonPagerNormal" value="{{ i }}"/></a>
+    						{% endif %}
+    					{% endfor %}
+    					
+    					{% if paginator.numPages != 1 %}
+    						<a href="/path/{{ table_name }}/?pageNumber={{ paginator.numPages }}" class="linkPager"><input type="button" class="buttonPager buttonPagerFU" value="{{ paginator.numPages }}"/></a>
+    					{% endif %}
+    					
+    					{% if paginator.hasNext %}
+        					<a href="/path/{{ table_name }}/?pageNumber={{ paginator.next }}" class="linkPager"><input type="button" class="buttonPager buttonPagerNormal" value="Siguiente"/></a>
+    					{% endif %}
+    					
+        				<span class="current">
+            				&nbsp;&nbsp;Registros de {{ paginator.actualNumberInit}} a {{ paginator.actualNumberFinish}} de {{ paginator.totalNumber}} en Total.
+        				</span>
+						</br>
+					</div>
+
+
+CSS.
+
+.buttonPager
+{
+	border-radius: 0px;
+	padding: 6px 12px;
+}
+
+.buttonPagerNormal
+{
+	border: 1px solid #ddd;
+}
+
+.buttonPagerFU
+{
+	border: 1px solid rgb(91, 128, 178);
+}
+
+.buttonPagerCentral
+{
+	border: 0px solid white;
+	background: gainsboro none repeat scroll 0% 0%;
+}
+
+.buttonPager:hover
+{
+	background: gainsboro none repeat scroll 0% 0%;
+}
