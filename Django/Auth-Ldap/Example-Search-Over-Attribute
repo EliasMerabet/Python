@@ -1,0 +1,18 @@
+userDN = ""
+passwordUser = ""
+base_dn = 'node where we start to seach'
+#attrs = ['description', 'telephoneNumber', 'title', 'mail' , 'lastLogon', 'memberOf', 'accountExpires',]
+attrs = []
+
+def myAccount(request):
+    con = ldap.initialize("ldap://ldapserver")
+    con.simple_bind_s( userDN, passwordUser )
+    filter = '(sAMAccountName=' + "loginName" + ')'
+    user = con.search_s( base_dn, ldap.SCOPE_SUBTREE, filter, attrs )
+    con.unbind()
+    
+    userInfoList = []
+    for key, value in user[0][1].items():
+        userInfoList +=  [userInfo(key, value)]
+        
+    return render_to_response('template.html',{'userInfoList':userInfoList, 'dnUser': user[0][0]}, context_instance = RequestContext(request))
