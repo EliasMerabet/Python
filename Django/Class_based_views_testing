@@ -1,0 +1,70 @@
+-- TEMPLATE --
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Index</title>
+</head>
+<body>
+
+    <h1>Peliculas</h1>
+    <ul>
+    {% for peli in lista %}
+        <li>DURACION: {{ peli.duracion }}</li>
+        <li>TITULO: {{ peli.titulo }}</li>
+        <li>ESTADO: {{ peli.estado }}</li>
+        <li></li>
+    {% endfor %}
+    </ul>
+
+    <form action="/" method="post">
+        {% csrf_token %}
+        <label for="test">Testing Post: </label>
+        <input id="test" type="text" name="test" value="{{ test }}">
+        <input type="submit" value="Let´s Test">
+    </form>
+
+</body>
+</html>
+
+-- FORMS.PY --
+
+from django import forms
+
+class NameForm(forms.Form):
+    test = forms.CharField(label='test', max_length=100, required=True)
+    
+-- URLS.PY --
+
+from django.conf.urls import url
+from django.contrib import admin
+from django.views.generic import TemplateView
+from Test.views import Index
+
+urlpatterns = [
+    url(r'^$', Index.as_view()),
+]
+
+-- VIEWS.PY --
+
+from Test.forms import NameForm
+
+# Create your views here.
+
+class Index(View):
+
+    def get(self, request):
+        peliculas = Cartelera.objects.all()
+        return render(request, "Index.html", {'lista':peliculas})
+
+    def post(self, request):
+        form = NameForm(request.POST)
+        peliculas = Cartelera.objects.all()
+        if form.is_valid():
+            test = form.data['test']
+            return render(request, 'Index.html', {'form': form, 'lista':peliculas, 'test': test +'1'})
+        else:
+            form = NameForm()
+
+        return render(request, 'Index.html', {'form': form, 'test': 'No'})
